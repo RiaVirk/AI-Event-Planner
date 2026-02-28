@@ -1,41 +1,55 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
-/node_modules
-/.pnp
+node_modules/
+.pnp
 .pnp.*
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+.pnpm-store/
+.pnpm-debug.log*
 
-# testing
-/coverage
 
-# next.js
-/.next/
-/out/
+.next/
+out/
+.swc/               # SWC cache (used in newer Next.js versions)
 
-# production
-/build
 
-# misc
+build/
+dist/
+
+
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.vercel
+
+
+coverage/
+.nyc_output/
+
+
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.sublime-workspace
+*.sublime-project
 .DS_Store
-*.pem
+Thumbs.db
+*.log
 
-# debug
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+*.pem
+*.tsbuildinfo          # Even in JS projects, sometimes appears
+next-env.d.ts          # Generated TS types (safe to ignore even without TS)
