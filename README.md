@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# AI-Powered Event Concierge
 
-## Getting Started
+A modern conversational web application that helps users plan events using natural language.  
+Powered by **Next.js**, **Vercel AI SDK** + **Groq API** — extremely fast LLM inference for real-time venue suggestions, plan refinement and event organization.
 
-First, run the development server:
+https://github.com/your-username/event-concierge
+
+<p align="center">
+  <img src="./public/screenshots/hero-chat.png" alt="Chat interface" width="800"/>
+  <br/><br/>
+  <em>Describe your event → get smart venue suggestions in seconds</em>
+</p>
+
+## ✨ Features
+
+- Natural language event description  
+  _“Casual 35-person birthday drinks in Austin, rooftop or patio, max $2800, next month”_
+- Extremely fast streaming responses thanks to **Groq API** (often <1s Time-to-First-Token)
+- Smart follow-up questions when details are missing
+- Venue suggestions with:
+  - Name & approximate location
+  - Capacity range
+  - Estimated price band
+  - 1–2 reasons why it matches the request
+- Conversational iteration (“cheaper options”, “indoor only”, “add finger food”)
+- Responsive design — great experience on mobile & desktop
+- Clean, modern UI built with Tailwind CSS + shadcn/ui
+
+## ⚡ Why Groq?
+
+Groq delivers some of the **fastest LLM inference** available in 2026 — especially for open-weight models:
+
+- Llama 3.1 70B / 405B
+- Mixtral 8x22B
+- Gemma 2 27B
+- Very low latency → makes streaming chat feel truly real-time
+
+## 🛠 Tech Stack
+
+| Layer        | Technology                            | Purpose                             |
+| ------------ | ------------------------------------- | ----------------------------------- |
+| Framework    | Next.js 16 (Pages Router)             | Full-stack React framework          |
+| Styling      | Tailwind CSS + shadcn/ui              | Modern, customizable components     |
+| AI SDK       | Vercel AI SDK v4/v5 (`@ai-sdk/react`) | Streaming UI + tool calling support |
+| LLM Provider | **Groq API**                          | Ultra-fast inference                |
+| Icons        | lucide-react + react-icons            | Clean & consistent icon set         |
+| Deployment   | Vercel (recommended)                  | One-click deploy + edge functions   |
+
+## 📸 Screenshots
+
+<p align="center">
+  <img src="./public/screenshots/chat-streaming.png" alt="Streaming response" width="48%"/>
+  <img src="./public/screenshots/mobile-view.png" alt="Mobile responsive" width="48%"/>
+</p>
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js ≥ 20
+- [Groq API key](https://console.groq.com/keys) (free tier available with generous rate limits)
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+git clone https://github.com/your-username/event-concierge.git
+cd event-concierge
+
+
+npm install
+
+
+cp .env.example GROQ_API_KEY=gsk_**********************************
+
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

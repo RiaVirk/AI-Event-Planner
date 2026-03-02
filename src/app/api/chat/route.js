@@ -1,21 +1,29 @@
-import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 
 export const maxDuration = 60;
 
 export async function POST(req) {
-  const { messages } = await req.json();
+  try {
+    const { messages } = await req.json();
 
-  const result = await streamText({
-    model: openai("gpt-4o-mini"), // can be 'gpt-4o', 'claude-3-5-sonnet-latest', etc.
-    messages,
-    system: `
-You are a friendly event concierge. Help people plan events.
-Ask questions if anything is unclear: number of guests, city/area, budget, date/time, vibe (casual, fancy, outdoor, etc.).
-When suggesting venues: give 3–5 options with name, rough price range, capacity, location, and 1–2 reasons why it fits.
-Use markdown formatting. Be conversational and helpful.
-`,
-  });
+    const cleanMessages = messages.map((m) => ({
+      role: m.role,
+      content: m.content,
+    }));
 
-  return result.toDataStreamResponse();
+    const result = await streamText({
+      model: google("gemini-2.5-flash"), // Flash is faster and more reliable for testing
+      messages: cleanMessages,
+      system: `You are a friendly event concierge. Help people plan events.`,
+    });
+
+    return result.toTextStreamResponse();
+  } catch (error) {
+    console.error("Chat API error:", error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 }
