@@ -132,7 +132,7 @@ export default function Home() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask for a party spot in NYC..."
+          placeholder="Let's plan something unforgettable – what's the occasion? 🎈"
           className="flex-1 h-12 px-4 rounded-md border bg-background"
         />
         <Button
