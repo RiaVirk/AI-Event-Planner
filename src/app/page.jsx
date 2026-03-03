@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Send, Sparkles, MapPin, Crown, Zap } from "lucide-react"; // Only one line for lucide-react
+import { Send, Sparkles, MapPin, Crown, Zap, Save } from "lucide-react"; // Only one line for lucide-react
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
@@ -11,6 +11,41 @@ export default function Home() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [persona, setPersona] = useState("party");
+  const [history, setHistory] = useState([]);
+
+  // 2. NEW: Function to save itinerary to SQL
+  const saveItinerary = async (aiContent) => {
+    // Find the last user message to use as the context/query
+    const lastUserMessage =
+      messages.findLast((m) => m.role === "user")?.content || "Event Plan";
+
+    try {
+      const response = await fetch("/api/save-itinerary", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          persona: persona,
+          user_query: lastUserMessage,
+          ai_response: aiContent,
+        }),
+      });
+
+      if (response.ok) {
+        alert("✨ Saved to your SQL database!");
+      } else {
+        alert("❌ Failed to save.");
+      }
+    } catch (err) {
+      console.error("Save error:", err);
+      alert("Connection error while saving.");
+    }
+  };
+
+  const fetchHistory = async () => {
+    const res = await fetch("/api/get-itineraries");
+    const data = await res.json();
+    setHistory(data);
+  };
 
   async function sendMessage(e) {
     e.preventDefault();
@@ -94,6 +129,17 @@ export default function Home() {
           className="prose prose-sm dark:prose-invert max-w-none"
         >
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{part}</ReactMarkdown>
+          {/* Add this: If it's the last part of a message, show the save button */}
+          {index === parts.length - 1 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => saveItinerary(content)}
+              className="mt-4 text-[10px] h-7 gap-1 text-muted-foreground hover:text-primary"
+            >
+              <Save className="h-3 w-3" /> Save Itinerary
+            </Button>
+          )}
         </div>
       );
     });

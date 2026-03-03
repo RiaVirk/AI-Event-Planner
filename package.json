@@ -12,6 +12,7 @@
     "@ai-sdk/google": "^3.0.36",
     "@ai-sdk/groq": "^3.0.26",
     "@ai-sdk/react": "^3.0.109",
+    "@vercel/postgres": "^0.10.0",
     "@vis.gl/react-google-maps": "^1.7.1",
     "ai": "^6.0.107",
     "class-variance-authority": "^0.7.1",
