@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Send, Sparkles, MapPin } from "lucide-react";
+import { Send, Sparkles, MapPin, Crown, Zap } from "lucide-react"; // Only one line for lucide-react
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
@@ -10,6 +10,7 @@ export default function Home() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [persona, setPersona] = useState("party");
 
   async function sendMessage(e) {
     e.preventDefault();
@@ -29,7 +30,7 @@ export default function Home() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: currentMessages }),
+        body: JSON.stringify({ messages: currentMessages, persona: persona }),
       });
 
       const reader = response.body.getReader();
@@ -61,13 +62,11 @@ export default function Home() {
     }
   }
 
-  // Helper function to extract and render Map
   const renderContent = (content) => {
     const mapRegex = /\[MAP:\s*(.*?)\]/g;
     const parts = content.split(mapRegex);
 
     return parts.map((part, index) => {
-      // If the part matches an address (every second item in split is the capture group)
       if (index % 2 === 1) {
         const address = encodeURIComponent(part);
         return (
@@ -83,14 +82,12 @@ export default function Home() {
               height="250"
               style={{ border: 0 }}
               loading="lazy"
-              // RIGHT: This is the official Embed API endpoint
               src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${address}`}
             ></iframe>
           </div>
         );
       }
-      // Regular text/markdown
-      // Regular text/markdown
+
       return (
         <div
           key={index}
@@ -106,13 +103,37 @@ export default function Home() {
     <div className="flex flex-col h-screen max-w-4xl mx-auto p-4 bg-background">
       <header className="text-center py-6 border-b">
         <h1 className="text-3xl font-bold tracking-tight">
-          AI Event Concierge
+          <Sparkles className="h-6 w-6" /> AI Event Concierge
         </h1>
         <p className="text-muted-foreground mt-1">Now with Live Map Previews</p>
       </header>
 
+      {/* NEW: Persona Toggle Buttons */}
+      <div className="flex justify-center gap-3 mt-4">
+        <Button
+          variant={persona === "concierge" ? "default" : "outline"}
+          onClick={() => setPersona("concierge")}
+          className="rounded-full flex gap-2"
+        >
+          <Crown className="h-4 w-4" /> Elite Concierge
+        </Button>
+        <Button
+          variant={persona === "party" ? "default" : "outline"}
+          onClick={() => setPersona("party")}
+          className="rounded-full flex gap-2"
+        >
+          <Zap className="h-4 w-4" /> Party Animal
+        </Button>
+      </div>
+
       <ScrollArea className="flex-1 border rounded-xl p-5 my-4 bg-muted/30">
         <div className="flex flex-col gap-5">
+          {messages.length === 0 && (
+            <div className="text-center text-muted-foreground mt-10">
+              Select your vibe above and say "Hi" to start planning!
+            </div>
+          )}
+
           {messages.map((m) => (
             <div
               key={m.id}

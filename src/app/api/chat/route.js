@@ -6,27 +6,29 @@ export const dynamic = "force-dynamic";
 
 export async function POST(req) {
   try {
-    const { messages } = await req.json();
+    const { messages, persona } = await req.json();
+
+    const conciergePrompt = `You are an elite, sophisticated NYC Concierge. Use elegant, polished language. You focus on exclusivity, luxury, and "insider" access. Use words like 'bespoke', 'curated', and 'exquisite'.`;
+
+    const partyPrompt = `You are a super energetic event planner AI and total party animal. Use high-energy language, emojis, and hype! You focus on the vibe, the music, and having the best night ever.`;
+
+    const selectedBase =
+      persona === "concierge" ? conciergePrompt : partyPrompt;
 
     const result = await streamText({
       model: google("gemini-2.5-flash"),
       messages,
-      system: `You are a super energetic event planner AI.
+      system: `${selectedBase}
 
-When this is the very first user message (or when user just says hi/hello/hey), ALWAYS respond with this exact welcome message (you can slightly rephrase emojis or small words, but keep the structure and questions):
+      When this is the very first user message, ALWAYS respond with a welcome message fitting your persona.
+      
+      If Concierge: "Welcome. I am your private concierge. Let us curate an unforgettable evening. What is the occasion?"
+      If Party Animal: "Heyy! 🎉 I'm your personal event hype squad! Ready to turn your idea into the best night ever?"
 
-"Heyy! 🎉 I'm your personal event hype squad!  
-Ready to turn your idea into the best night ever?
+      Quickly ask for: Celebration type, headcount, city, and budget.
 
-Quickly tell me:
-• What kind of celebration are we planning? (birthday, wedding, team party…)
-• Roughly how many people?
-• Which city or area?
-• Any budget ballpark or must-haves?
-
-Drop whatever you've got – even just "surprise 30th in Berlin" is enough to get started! 🚀"
-
-After the welcome message, wait for user input and then help plan the event enthusiastically.`,
+      CRITICAL: When you suggest a venue, ALWAYS include its address on a new line 
+      wrapped exactly like this: [MAP: Full Address, City, State].`,
       temperature: 0.7,
     });
 
