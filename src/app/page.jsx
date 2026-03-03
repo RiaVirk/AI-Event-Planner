@@ -1,124 +1,157 @@
 "use client";
 
-import { Send } from "lucide-react";
+import React, { useState } from "react";
+import { Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const handleSubmit = async (e) => {
+  async function sendMessage(e) {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
     const userMessage = {
-      id: Date.now().toString(),
+      id: Date.now().toString() + "-user",
       role: "user",
-      content: input,
+      content: input.trim(),
     };
-    setMessages((prev) => [...prev, userMessage]);
-    const currentInput = input;
+
+    const currentMessages = [...messages, userMessage];
+    setMessages(currentMessages);
     setInput("");
     setIsLoading(true);
 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
-        body: JSON.stringify({ messages: [...messages, userMessage] }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: currentMessages }),
       });
 
-      if (!response.ok) throw new Error("Failed to connect to AI");
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `Server error ${response.status}`);
+      }
 
-      // Handle the stream
+      if (!response.body) throw new Error("No response body");
+
       const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let assistantMessage = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "",
-      };
+      const decoder = new TextDecoder("utf-8", { fatal: true });
 
-      setMessages((prev) => [...prev, assistantMessage]);
+      let assistantContent = "";
+      const assistantId = Date.now().toString() + "-assistant";
+
+      // Optimistic UI: show empty bubble immediately
+      setMessages((prev) => [
+        ...prev,
+        { id: assistantId, role: "assistant", content: "" },
+      ]);
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
-        assistantMessage.content += chunk;
+        if (chunk) {
+          assistantContent += chunk;
 
-        // Update the last message in the list with the new chunk
-        setMessages((prev) => {
-          const newMessages = [...prev];
-          newMessages[newMessages.length - 1] = { ...assistantMessage };
-          return newMessages;
-        });
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantId
+                ? { ...msg, content: assistantContent }
+                : msg,
+            ),
+          );
+        }
       }
-    } catch (err) {
-      console.error("Chat Error:", err);
+    } catch (error) {
+      console.error("Streaming error:", error);
+      alert("Error: " + (error?.message || "Something went wrong"));
     } finally {
       setIsLoading(false);
     }
-  };
-
-  if (!mounted) return null;
+  }
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto p-4">
-      <header className="text-center py-8">
-        <h1 className="text-4xl font-bold tracking-tight">
+    <div className="flex flex-col h-screen max-w-4xl mx-auto p-4 bg-background text-foreground">
+      <header className="text-center py-6 border-b">
+        <h1 className="text-3xl font-bold tracking-tight">
           AI Event Concierge
         </h1>
+        <p className="text-muted-foreground mt-1">
+          Find events, venues, recommendations — powered by Gemini
+        </p>
       </header>
 
-      <ScrollArea className="flex-1 border rounded-xl p-5 mb-4 bg-background/60 backdrop-blur-sm shadow-sm">
-        <div className="flex flex-col gap-4">
+      <ScrollArea className="flex-1 border rounded-xl p-5 my-4 bg-muted/30">
+        <div className="flex flex-col gap-5">
+          {messages.length === 0 && (
+            <div className="text-center py-20 text-muted-foreground">
+              <Sparkles className="mx-auto h-10 w-10 mb-4 text-primary opacity-70" />
+              <p>
+                Try asking: "Events in London this weekend" or "Best rooftop
+                bars in NYC"
+              </p>
+            </div>
+          )}
+
           {messages.map((m) => (
             <div
               key={m.id}
               className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[82%] rounded-2xl px-5 py-3 ${
+                className={`max-w-[85%] rounded-2xl px-5 py-3 ${
                   m.role === "user"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-black"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-card border shadow-sm text-card-foreground"
                 }`}
               >
-                {m.content}
+                {m.role === "user" ? (
+                  m.content
+                ) : (
+                  /* The magic happens here with the "prose" class */
+                  <article
+                    className="prose prose-sm dark:prose-invert max-w-none 
+                            prose-headings:font-bold prose-p:leading-relaxed 
+                            prose-li:my-1"
+                  >
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {m.content || "..."}
+                    </ReactMarkdown>
+                  </article>
+                )}
               </div>
             </div>
           ))}
-          {isLoading &&
-            !messages.find((m) => m.role === "assistant" && m.content) && (
-              <div className="text-sm text-muted-foreground animate-pulse">
-                Thinking...
-              </div>
-            )}
+
+          {isLoading && messages.length > 0 && (
+            <div className="text-xs animate-pulse text-muted-foreground pl-3">
+              AI is thinking...
+            </div>
+          )}
         </div>
       </ScrollArea>
 
-      <form onSubmit={handleSubmit} className="flex gap-3">
-        <Input
+      <form onSubmit={sendMessage} className="flex gap-3 pb-2">
+        <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-1 h-12 text-base"
-          autoComplete="off"
+          placeholder="Ask about events, venues, recommendations..."
+          className="flex-1 h-12 px-4 rounded-md border border-input bg-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          disabled={isLoading}
         />
         <Button
           type="submit"
-          disabled={isLoading || !input.trim()}
-          className="h-12 px-6"
+          size="icon"
+          className="h-12 w-12"
+          disabled={isLoading}
         >
           <Send className="h-5 w-5" />
         </Button>
@@ -126,155 +159,3 @@ export default function Home() {
     </div>
   );
 }
-
-// import { useChat } from "@ai-sdk/react";
-// import { Send } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { ScrollArea } from "@/components/ui/scroll-area";
-// import { useState, useEffect } from "react";
-
-// export default function Home() {
-//   const [mounted, setMounted] = useState(false);
-
-//   // 1. Call useChat at the top level
-//   const { messages, input, handleInputChange, handleSubmit, isLoading } =
-//     useChat({
-//       api: "/api/chat",
-//     });
-
-//   // 2. Only show the full UI once the component is "mounted" on the client
-//   useEffect(() => {
-//     setMounted(true);
-//   }, []);
-
-//   if (!mounted) return null;
-
-//   return (
-//     <div className="flex flex-col h-screen max-w-4xl mx-auto p-4">
-//       <header className="text-center py-8">
-//         <h1 className="text-4xl font-bold tracking-tight">
-//           AI Event Concierge
-//         </h1>
-//       </header>
-
-//       <ScrollArea className="flex-1 border rounded-xl p-5 mb-4 bg-background/60 backdrop-blur-sm shadow-sm">
-//         <div className="flex flex-col gap-4">
-//           {messages.map((m) => (
-//             <div
-//               key={m.id}
-//               className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-//             >
-//               <div
-//                 className={`max-w-[82%] rounded-2xl px-5 py-3 ${
-//                   m.role === "user"
-//                     ? "bg-blue-600 text-white"
-//                     : "bg-gray-200 text-black"
-//                 }`}
-//               >
-//                 {m.content}
-//               </div>
-//             </div>
-//           ))}
-//           {isLoading && (
-//             <div className="text-sm text-muted-foreground animate-pulse">
-//               Thinking...
-//             </div>
-//           )}
-//         </div>
-//       </ScrollArea>
-
-//       <form onSubmit={handleSubmit} className="flex gap-3">
-//         <Input
-//           // Ensure value is at least an empty string
-//           value={input ?? ""}
-//           onChange={handleInputChange}
-//           placeholder="Type your message..."
-//           className="flex-1 h-12 text-base"
-//           autoComplete="off"
-//           disabled={isLoading}
-//         />
-//         <Button
-//           type="submit"
-//           // Safety check: input?.trim() ensures we don't crash if input is undefined
-//           disabled={isLoading || !input?.trim()}
-//           className="h-12 px-6"
-//         >
-//           <Send className="h-5 w-5" />
-//         </Button>
-//       </form>
-//     </div>
-//   );
-// }
-
-// "use client";
-
-// import { useChat } from "@ai-sdk/react";
-// import { Send } from "lucide-react";
-// import { Button } from "@/components/ui/button";
-// import { Input } from "@/components/ui/input";
-// import { ScrollArea } from "@/components/ui/scroll-area";
-
-// export default function Home() {
-//   // Pull 'input', 'handleInputChange', and 'handleSubmit' directly from useChat
-//   const { messages, input, handleInputChange, handleSubmit, isLoading } =
-//     useChat({
-//       api: "/api/chat",
-//     });
-
-//   return (
-//     <div className="flex flex-col h-screen max-w-4xl mx-auto p-4">
-//       <header className="text-center py-8">
-//         <h1 className="text-4xl font-bold tracking-tight">
-//           AI Event Concierge
-//         </h1>
-//       </header>
-
-//       <ScrollArea className="flex-1 border rounded-xl p-5 mb-4 bg-background/60 backdrop-blur-sm shadow-sm">
-//         <div className="flex flex-col gap-4">
-//           {messages.map((m) => (
-//             <div
-//               key={m.id}
-//               className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
-//             >
-//               <div
-//                 className={`max-w-[82%] rounded-2xl px-5 py-3 ${
-//                   m.role === "user"
-//                     ? "bg-blue-600 text-white"
-//                     : "bg-gray-200 text-black"
-//                 }`}
-//               >
-//                 {/* m.content will now populate as the stream comes in */}
-//                 {m.content}
-//               </div>
-//             </div>
-//           ))}
-//           {isLoading && (
-//             <div className="text-sm text-muted-foreground animate-pulse">
-//               Thinking...
-//             </div>
-//           )}
-//         </div>
-//       </ScrollArea>
-
-//       {/* The form now uses the built-in handleSubmit */}
-//       <form onSubmit={handleSubmit} className="flex gap-3">
-//         <Input
-//           value={input}
-//           onChange={handleInputChange} // Built-in handler
-//           placeholder="Type your message..."
-//           className="flex-1 h-12 text-base"
-//           autoComplete="off"
-//           disabled={isLoading}
-//         />
-//         <Button
-//           type="submit"
-//           disabled={isLoading || !(input || "").trim()}
-//           className="h-12 px-6"
-//         >
-//           <Send className="h-5 w-5" />
-//         </Button>
-//       </form>
-//     </div>
-//   );
-// }
