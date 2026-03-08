@@ -1,9 +1,11 @@
 # AI-Powered Event Concierge
 
+Live Demo: https://ai-event-planner-lac.vercel.app/
+
 A modern conversational web application that helps users plan events using natural language.  
 Powered by **Next.js**, **Vercel AI SDK** + **Google Gemini API** — extremely fast LLM inference for real-time venue suggestions, plan refinement and event organization.
 
-https://github.com/your-username/event-concierge
+https://github.com/RiaVirk/AI-Event-Planner
 
 <p align="center">
   <img src="./public/screenshots/hero-chat.png" alt="Chat interface" width="800"/>
@@ -26,6 +28,14 @@ https://github.com/your-username/event-concierge
 - Responsive design — great experience on mobile & desktop
 - Clean, modern UI built with Tailwind CSS + shadcn/ui
 
+## Architecture
+
+User → Next.js Chat UI → API Route → Gemini 2.5 Flash
+↓
+PostgreSQL (chat history)
+
+Venue data → Google Maps API → Map previews
+
 ## ⚡ Why Gemini 2.5 Flash?
 
 Gemini 2.5 Flash delivers some of the **best price-performance** and lowest-latency inference available in 2026 — especially with thinking/reasoning capabilities built-in:
@@ -47,11 +57,22 @@ Gemini 2.5 Flash delivers some of the **best price-performance** and lowest-late
 | Icons        | lucide-react + react-icons                 | Clean & consistent icon set         |
 | Deployment   | Vercel (recommended)                       | One-click deploy + edge functions   |
 
+### What I Learned
+
+• Designing prompt structures for personality-driven AI assistants
+• Streaming LLM responses in real time using Vercel AI SDK
+• Handling conversational context and follow-up queries
+• Building production-ready full-stack apps with Next.js
+• Integrating external APIs (Gemini + Maps)
+
 ## 📸 Screenshots
 
 <p align="center">
-  <img src="./public/screenshots/chat-streaming.png" alt="Streaming response" width="48%"/>
-  <img src="./public/screenshots/mobile-view.png" alt="Mobile responsive" width="48%"/>
+  <img src="./public/screenshots/Screenshot_01.png" alt="Streaming response" width="48%"/>
+  <img src="./public/screenshots/Screenshot_02.png" alt="Streaming response" width="48%"/>
+  <img src="./public/screenshots/Screenshot_M_01.png" alt="Mobile responsive" width="48%"/>
+  <img src="./public/screenshots/Screenshot_M_02.png" alt="Mobile responsive" width="48%"/>
+  <img src="./public/screenshots/Screenshot_M_03.png" alt="Mobile responsive" width="48%"/>
 </p>
 
 ## 🚀 Quick Start
@@ -70,4 +91,7 @@ cd event-concierge
 npm install
 
 cp .env.example .env
+
+
+
 ```
