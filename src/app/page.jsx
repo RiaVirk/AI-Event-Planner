@@ -1,6 +1,15 @@
 "use client";
-import React, { useState } from "react";
-import { Send, Sparkles, MapPin, Crown, Zap, Save } from "lucide-react"; // Only one line for lucide-react
+import React, { useState, useEffect } from "react";
+import {
+  Send,
+  Sparkles,
+  MapPin,
+  Crown,
+  Zap,
+  Save,
+  History,
+  Clock,
+} from "lucide-react"; // Only one line for lucide-react
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ReactMarkdown from "react-markdown";
@@ -12,6 +21,7 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [persona, setPersona] = useState("party");
   const [history, setHistory] = useState([]);
+  const [showHistory, setShowHistory] = useState(false);
 
   // 2. NEW: Function to save itinerary to SQL
   const saveItinerary = async (aiContent) => {
