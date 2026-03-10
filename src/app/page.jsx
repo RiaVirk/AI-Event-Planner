@@ -15,6 +15,9 @@ import {
   Clock3,
   ChevronDown,
   ChevronUp,
+  PlusCircle,
+  Moon,
+  Sun, // ✅ NEW: added PlusCircle, Moon, Sun icons
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,11 +31,27 @@ export default function Home() {
   const [persona, setPersona] = useState("party");
   const [history, setHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
-  const [placeDetails, setPlaceDetails] = useState({}); // ✅ NEW
-  const [expandedHours, setExpandedHours] = useState({}); // ✅ NEW
+  const [placeDetails, setPlaceDetails] = useState({});
+  const [expandedHours, setExpandedHours] = useState({});
+  const [isDark, setIsDark] = useState(false); // ✅ NEW: dark mode state
 
   useEffect(() => {
     fetchHistory();
+  }, []);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDark]);
+
+  useEffect(() => {
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)",
+    ).matches;
+    setIsDark(prefersDark);
   }, []);
 
   const fetchHistory = async () => {
@@ -46,7 +65,7 @@ export default function Home() {
   };
 
   const fetchPlaceDetails = async (address) => {
-    if (placeDetails[address]) return; // already fetched, skip
+    if (placeDetails[address]) return;
     try {
       const res = await fetch(
         `/api/place-details?query=${encodeURIComponent(address)}`,
@@ -58,22 +77,23 @@ export default function Home() {
     }
   };
 
+  const startNewChat = () => {
+    setMessages([]);
+    setInput("");
+    setPlaceDetails({});
+    setExpandedHours({});
+    setShowHistory(false);
+  };
+
   const loadHistory = (item) => {
     setMessages([
-      {
-        id: Date.now() + "-u",
-        role: "user",
-        content: item.user_query,
-      },
-      {
-        id: Date.now() + "-a",
-        role: "assistant",
-        content: item.ai_response,
-      },
+      { id: Date.now() + "-u", role: "user", content: item.user_query },
+      { id: Date.now() + "-a", role: "assistant", content: item.ai_response },
     ]);
     setPersona(item.persona);
-    setShowHistory(false); // close sidebar after selecting
+    setShowHistory(false);
   };
+
   const saveItinerary = async (aiContent) => {
     const lastUserMessage =
       messages.findLast((m) => m.role === "user")?.content || "Event Plan";
@@ -87,8 +107,12 @@ export default function Home() {
           ai_response: aiContent,
         }),
       });
-      if (response.ok) alert("✨ Saved to your SQL database!");
-      else alert("❌ Failed to save.");
+      if (response.ok) {
+        alert("✨ Saved to your SQL database!");
+        fetchHistory();
+      } else {
+        alert("❌ Failed to save.");
+      }
     } catch (err) {
       alert("Connection error while saving.");
     }
@@ -155,7 +179,9 @@ export default function Home() {
   };
 
   const renderContent = (content) => {
+    // Guard against non-string content
     if (!content || typeof content !== "string") return null;
+
     const mapRegex = /\[MAP:\s*(.*?)\]/g;
     const parts = content.split(mapRegex);
 
@@ -187,7 +213,6 @@ export default function Home() {
 
             {details ? (
               <div className="bg-card border-t divide-y divide-border text-sm">
-                {/* Rating + Open/Closed status */}
                 <div className="px-4 py-3 flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     {details.rating && (
@@ -311,7 +336,6 @@ export default function Home() {
                           const colonIndex = day.indexOf(": ");
                           const dayName = day.substring(0, colonIndex);
                           const hours = day.substring(colonIndex + 2);
-
                           const todayIndex = (new Date().getDay() + 6) % 7;
                           const isToday = i === todayIndex;
                           return (
@@ -367,6 +391,7 @@ export default function Home() {
 
   return (
     <div className="fixed inset-0 flex bg-background overflow-hidden">
+      {/* HISTORY SIDEBAR */}
       <div
         className={`${showHistory ? "w-80" : "w-0"} transition-all duration-300 border-r bg-muted/10 flex flex-col overflow-hidden`}
       >
@@ -388,7 +413,7 @@ export default function Home() {
               <div
                 key={item.id}
                 onClick={() => loadHistory(item)}
-                className="p-3 rounded-lg border bg-card hover:border-primary/50 transition-colors cursor-pointer"
+                className="p-3 rounded-lg border bg-card hover:border-primary/50 hover:bg-accent/50 transition-colors cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-1">
                   <span
@@ -407,6 +432,9 @@ export default function Home() {
                 <p className="text-sm font-medium line-clamp-2">
                   {item.user_query}
                 </p>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  Click to load →
+                </p>
               </div>
             ))}
             {history.length === 0 && (
@@ -418,8 +446,10 @@ export default function Home() {
         </ScrollArea>
       </div>
 
+      {/* MAIN CHAT AREA */}
       <div className="flex-1 flex flex-col overflow-hidden p-4">
         <header className="flex justify-between items-center py-4 border-b mb-4">
+          {/* Left: History toggle */}
           <Button
             variant="outline"
             size="icon"
@@ -427,10 +457,36 @@ export default function Home() {
           >
             <History className="h-5 w-5" />
           </Button>
+
+          {/* Center: Title */}
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" /> AI Event Concierge
           </h1>
-          <div className="w-10" />
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={startNewChat}
+              title="New Chat"
+            >
+              <PlusCircle className="h-5 w-5" />
+            </Button>
+
+            {/* ✅ NEW: Dark mode toggle */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setIsDark((prev) => !prev)}
+              title="Toggle dark mode"
+            >
+              {isDark ? (
+                <Sun className="h-5 w-5 text-amber-400" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
+          </div>
         </header>
 
         <div className="flex justify-center gap-3 mb-4">
@@ -450,6 +506,7 @@ export default function Home() {
           </Button>
         </div>
 
+        {/* CHAT MESSAGES */}
         <div className="flex-1 min-h-0 overflow-y-auto border rounded-xl p-5 mb-4 bg-muted/30 shadow-inner">
           <div className="flex flex-col gap-5 max-w-4xl mx-auto">
             {messages.length === 0 && (
