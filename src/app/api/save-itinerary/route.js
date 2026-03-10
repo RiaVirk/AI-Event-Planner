@@ -9,8 +9,6 @@ export async function POST(req) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    // @vercel/postgres handles the conversion to JSONB automatically
-    // if you pass a string that is valid JSON or a JS Object.
     await sql`
       INSERT INTO itineraries (persona, user_query, ai_response)
       VALUES (${persona}, ${user_query}, ${JSON.stringify(ai_response)});

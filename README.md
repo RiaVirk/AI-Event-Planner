@@ -1,8 +1,8 @@
-# 🎉 AI Event Concierge
+# AI Event Concierge
 
 > An AI-powered event planning assistant that recommends venues, shows live Google Maps, and fetches real-time venue details — all in a sleek streaming chat interface.
 
-**[🔗 Live Demo](https://ai-event-planner-lac.vercel.app/)** | **[🐙 GitHub](https://github.com/RiaVirk/AI-Event-Planner)**
+**[ Live Demo](https://ai-event-planner-lac.vercel.app/)** | **[ GitHub](https://github.com/RiaVirk/AI-Event-Planner)**
 
 <p align="center">
   <img src="./public/screenshots/Screenshot_01.png" alt="Chat interface" width="800"/>
@@ -35,17 +35,17 @@
 
 ---
 
-## ✨ Features
+## Features
 
-- 🤖 **Two AI Personas** — Elite Concierge (luxury/refined) or Party Animal (hype/energetic)
-- 💬 **Natural language planning** — _"Casual 35-person birthday drinks in Austin, rooftop or patio, max $2800"_
-- ⚡ **Extremely fast streaming** — Gemini 2.5 Flash often hits <1s Time-to-First-Token
-- 🗺️ **Live Google Maps** — embedded map for every venue suggestion
-- 📍 **Real venue details** — rating, reviews, phone, website, address, opening hours, price level
-- 💾 **Save & History** — save itineraries to PostgreSQL and reload anytime
-- 🌙 **Dark Mode** — toggle with OS preference auto-detection
-- ➕ **New Chat** — clear and start fresh instantly
-- 📱 **Responsive design** — great on mobile & desktop
+- **Two AI Personas** — Elite Concierge (luxury/refined) or Party Animal (hype/energetic)
+- **Natural language planning** — _"Casual 35-person birthday drinks in Austin, rooftop or patio, max $2800"_
+- **Extremely fast streaming** — Gemini 2.5 Flash often hits <1s Time-to-First-Token
+- **Live Google Maps** — embedded map for every venue suggestion
+- **Real venue details** — rating, reviews, phone, website, address, opening hours, price level
+- **Save & History** — save itineraries to PostgreSQL and reload anytime
+- **Dark Mode** — toggle with OS preference auto-detection
+- **New Chat** — clear and start fresh instantly
+- **Responsive design** — great on mobile & desktop
 
 ---
 
@@ -74,7 +74,7 @@ Venue tag [MAP: Name, City] → Google Maps Embed API → Live map preview
 
 ---
 
-## 🧠 Thought Process & Learnings
+## Thought Process & Learnings
 
 ### Why this stack?
 

@@ -33,7 +33,7 @@ export default function Home() {
   const [showHistory, setShowHistory] = useState(false);
   const [placeDetails, setPlaceDetails] = useState({});
   const [expandedHours, setExpandedHours] = useState({});
-  const [isDark, setIsDark] = useState(false); // ✅ NEW: dark mode state
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     fetchHistory();
@@ -108,10 +108,10 @@ export default function Home() {
         }),
       });
       if (response.ok) {
-        alert("✨ Saved to your SQL database!");
+        alert(" Saved to your SQL database!");
         fetchHistory();
       } else {
-        alert("❌ Failed to save.");
+        alert(" Failed to save.");
       }
     } catch (err) {
       alert("Connection error while saving.");
@@ -404,7 +404,7 @@ export default function Home() {
             size="sm"
             onClick={() => setShowHistory(false)}
           >
-            hide
+            Hide
           </Button>
         </div>
         <ScrollArea className="flex-1 p-4">
@@ -446,10 +446,8 @@ export default function Home() {
         </ScrollArea>
       </div>
 
-      {/* MAIN CHAT AREA */}
       <div className="flex-1 flex flex-col overflow-hidden p-4">
         <header className="flex justify-between items-center py-4 border-b mb-4">
-          {/* Left: History toggle */}
           <Button
             variant="outline"
             size="icon"
@@ -458,7 +456,6 @@ export default function Home() {
             <History className="h-5 w-5" />
           </Button>
 
-          {/* Center: Title */}
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" /> AI Event Concierge
           </h1>
@@ -473,7 +470,6 @@ export default function Home() {
               <PlusCircle className="h-5 w-5" />
             </Button>
 
-            {/* ✅ NEW: Dark mode toggle */}
             <Button
               variant="outline"
               size="icon"
@@ -506,7 +502,6 @@ export default function Home() {
           </Button>
         </div>
 
-        {/* CHAT MESSAGES */}
         <div className="flex-1 min-h-0 overflow-y-auto border rounded-xl p-5 mb-4 bg-muted/30 shadow-inner">
           <div className="flex flex-col gap-5 max-w-4xl mx-auto">
             {messages.length === 0 && (

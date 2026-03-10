@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    // Fetching latest 10 saved plans
     const { rows } = await sql`
       SELECT id, persona, user_query, ai_response, created_at 
       FROM itineraries 
