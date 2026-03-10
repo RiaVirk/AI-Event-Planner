@@ -5,7 +5,7 @@
 **[🔗 Live Demo](https://ai-event-planner-lac.vercel.app/)** | **[🐙 GitHub](https://github.com/RiaVirk/AI-Event-Planner)**
 
 <p align="center">
-  <img src="./public/screenshots/hero-chat.png" alt="Chat interface" width="800"/>
+  <img src="./public/screenshots/Screenshot_01.png" alt="Chat interface" width="800"/>
   <br/><br/>
   <em>Describe your event → get smart venue suggestions with live maps in seconds</em>
 </p>
