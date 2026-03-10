@@ -45,7 +45,6 @@ export default function Home() {
     }
   };
 
-  // ✅ NEW: Fetch place details from Google Places API
   const fetchPlaceDetails = async (address) => {
     if (placeDetails[address]) return; // already fetched, skip
     try {
@@ -59,6 +58,22 @@ export default function Home() {
     }
   };
 
+  const loadHistory = (item) => {
+    setMessages([
+      {
+        id: Date.now() + "-u",
+        role: "user",
+        content: item.user_query,
+      },
+      {
+        id: Date.now() + "-a",
+        role: "assistant",
+        content: item.ai_response,
+      },
+    ]);
+    setPersona(item.persona);
+    setShowHistory(false); // close sidebar after selecting
+  };
   const saveItinerary = async (aiContent) => {
     const lastUserMessage =
       messages.findLast((m) => m.role === "user")?.content || "Event Plan";
@@ -129,7 +144,6 @@ export default function Home() {
     }
   }
 
-  // ✅ NEW: helper to render star string
   const renderStars = (rating) => {
     const full = Math.floor(rating);
     const half = rating % 1 >= 0.5;
@@ -141,6 +155,7 @@ export default function Home() {
   };
 
   const renderContent = (content) => {
+    if (!content || typeof content !== "string") return null;
     const mapRegex = /\[MAP:\s*(.*?)\]/g;
     const parts = content.split(mapRegex);
 
@@ -150,7 +165,6 @@ export default function Home() {
         const details = placeDetails[address];
         const isHoursExpanded = expandedHours[address];
 
-        // Trigger fetch when this renders
         if (!details) fetchPlaceDetails(address);
 
         return (
@@ -158,13 +172,11 @@ export default function Home() {
             key={index}
             className="my-4 rounded-xl overflow-hidden border-2 border-primary/20 shadow-lg"
           >
-            {/* ✅ Map header shows actual venue name once loaded */}
             <div className="bg-muted p-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
               <MapPin className="h-3 w-3 text-primary" />
               {details?.name || address}
             </div>
 
-            {/* Google Map Embed */}
             <iframe
               width="100%"
               height="220"
@@ -173,7 +185,6 @@ export default function Home() {
               src={`https://www.google.com/maps/embed/v1/place?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&q=${encodeURIComponent(address)}`}
             />
 
-            {/* ✅ NEW: Place Details Panel */}
             {details ? (
               <div className="bg-card border-t divide-y divide-border text-sm">
                 {/* Rating + Open/Closed status */}
@@ -212,7 +223,6 @@ export default function Home() {
                   )}
                 </div>
 
-                {/* Price Level */}
                 {details.price_level !== undefined && (
                   <div className="px-4 py-3 flex items-center gap-3 text-xs">
                     <span className="text-muted-foreground font-medium">
@@ -227,7 +237,6 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Phone */}
                 {details.formatted_phone_number && (
                   <div className="px-4 py-3 flex items-center gap-3">
                     <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -240,7 +249,6 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Website */}
                 {details.website && (
                   <div className="px-4 py-3 flex items-center gap-3">
                     <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
@@ -269,7 +277,6 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Address */}
                 {details.formatted_address && (
                   <div className="px-4 py-3 flex items-start gap-3">
                     <MapPin className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
@@ -279,7 +286,6 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Opening Hours - Expandable */}
                 {details.opening_hours?.weekday_text?.length > 0 && (
                   <div className="px-4 py-3">
                     <button
@@ -305,8 +311,7 @@ export default function Home() {
                           const colonIndex = day.indexOf(": ");
                           const dayName = day.substring(0, colonIndex);
                           const hours = day.substring(colonIndex + 2);
-                          // Google returns Mon-Sun starting from index 0=Mon
-                          // JS getDay() returns 0=Sun so we offset
+
                           const todayIndex = (new Date().getDay() + 6) % 7;
                           const isToday = i === todayIndex;
                           return (
@@ -329,7 +334,6 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              // Loading state
               <div className="px-4 py-4 bg-card border-t space-y-2">
                 <div className="h-3 bg-muted rounded animate-pulse w-1/3" />
                 <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
@@ -363,7 +367,6 @@ export default function Home() {
 
   return (
     <div className="fixed inset-0 flex bg-background overflow-hidden">
-      {/* HISTORY SIDEBAR */}
       <div
         className={`${showHistory ? "w-80" : "w-0"} transition-all duration-300 border-r bg-muted/10 flex flex-col overflow-hidden`}
       >
@@ -384,6 +387,7 @@ export default function Home() {
             {history.map((item) => (
               <div
                 key={item.id}
+                onClick={() => loadHistory(item)}
                 className="p-3 rounded-lg border bg-card hover:border-primary/50 transition-colors cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-1">
@@ -414,7 +418,6 @@ export default function Home() {
         </ScrollArea>
       </div>
 
-      {/* MAIN CHAT AREA */}
       <div className="flex-1 flex flex-col overflow-hidden p-4">
         <header className="flex justify-between items-center py-4 border-b mb-4">
           <Button
@@ -447,7 +450,6 @@ export default function Home() {
           </Button>
         </div>
 
-        {/* CHAT MESSAGES */}
         <div className="flex-1 min-h-0 overflow-y-auto border rounded-xl p-5 mb-4 bg-muted/30 shadow-inner">
           <div className="flex flex-col gap-5 max-w-4xl mx-auto">
             {messages.length === 0 && (
