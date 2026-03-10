@@ -27,8 +27,7 @@ export async function POST(req) {
 
       Quickly ask for: Celebration type, headcount, city, and budget.
 
-      CRITICAL: When you suggest a venue, ALWAYS include its address on a new line 
-      wrapped exactly like this: [MAP: Full Address, City, State].`,
+      CRITICAL: When you suggest a venue, ALWAYS include it on a new line wrapped exactly like this: [MAP: Venue Name, City]. Use the BUSINESS NAME, never a street address. Example: [MAP: Klunkerkranich, Berlin] or [MAP: Berghain, Berlin] or [MAP: Nobu Restaurant, London].`,
       temperature: 0.7,
     });
 
